@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Car Race</title>
+  <style>
+    body {
+        text-align: center;
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(to right, #1c1c1c, #2e2e2e);
+        color: white;
+    }
+
+    h1 {
+        font-size: 32px;
+        margin: 20px 0;
+        text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
+    }
+
+    #raceCanvas {
+        border: 4px solid white;
+        background-color: gray;
+        display: block;
+        margin: 20px auto;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    #startRace {
+        padding: 12px 25px;
+        font-size: 20px;
+        cursor: pointer;
+        border: none;
+        background: linear-gradient(to right, #ff8c00, #ff4500);
+        color: white;
+        font-weight: bold;
+        border-radius: 5px;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
+    }
+
+    #startRace:hover {
+        background: linear-gradient(to right, #ff4500, #ff0000);
+        box-shadow: 0 0 20px rgba(255, 69, 0, 0.9);
+        transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>Car Race</h1>
+  <canvas id="raceCanvas" width="1200" height="800"></canvas>
+  <button id="startRace" onclick="beginRace()">Start Race</button>
+
+  <script>
+    class RaceCar {
+      constructor(id) {
+        this.id = id;
+        this.x = canvas.width - 120;
+        this.y = 100 + id * 150;
+        this.speed = this.generateRandomSpeed();
+        this.bodyColor = this.getRandomColor();
+        this.windowColor = this.getRandomColor();
+      }
+
+      generateRandomSpeed() {
+        return Math.floor(Math.random() * 8) + 1;
+      }
+
+      getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+
+      drawCar() {
+        // Car Body
+        ctx.fillStyle = this.bodyColor;
+        ctx.fillRect(this.x, this.y, 120, 40);
+        ctx.beginPath();
+        ctx.moveTo(this.x + 20, this.y);
+        ctx.lineTo(this.x + 40, this.y - 20);
+        ctx.lineTo(this.x + 80, this.y - 20);
+        ctx.lineTo(this.x + 100, this.y);
+        ctx.closePath();
+        ctx.fill();
+
+        // Windows
+        ctx.fillStyle = this.windowColor;
+        ctx.fillRect(this.x + 30, this.y - 15, 20, 15);
+        ctx.fillRect(this.x + 70, this.y - 15, 20, 15);
+
+        // Car Number
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "red";
+        ctx.strokeText(this.id, this.x + 55, this.y + 30);
+        ctx.fillText(this.id, this.x + 55, this.y + 30);
+        // Wheels
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(this.x + 30, this.y + 40, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.x + 90, this.y + 40, 10, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      moveCar() {
+        if (raceActive) {
+          this.x -= this.speed;
+          this.speed = this.generateRandomSpeed();
+          if (this.x <= 0) {
+            raceActive = false;
+            alert('Car ' + this.id + ' wins the race!');
+          }
+        }
+        this.drawCar();
+      }
+    }
+
+    const canvas = document.getElementById('raceCanvas');
+    const ctx = canvas.getContext('2d');
+    const raceCars = [];
+    let raceActive = false;
+
+    function beginRace() {
+      if (!raceActive) {
+        raceActive = true;
+        raceCars.forEach(car => {
+          car.speed = car.generateRandomSpeed();
+        });
+      }
+    }
+
+    function initializeRace() {
+      for (let i = 0; i < 4; i++) {
+        raceCars.push(new RaceCar(i + 1));
+      }
+      setInterval(refreshCanvas, 20);
+    }
+
+    function refreshCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      raceCars.forEach(car => {
+        car.moveCar();
+      });
+    }
+
+    initializeRace();
+  </script>
+</body>
+</html>
